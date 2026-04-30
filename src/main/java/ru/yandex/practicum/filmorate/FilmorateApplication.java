@@ -7,8 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import ch.qos.logback.classic.Logger;
 
 
-import static ch.qos.logback.classic.Level.DEBUG;
-
 @SpringBootApplication
 public class FilmorateApplication {
 
