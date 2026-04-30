@@ -11,279 +11,278 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FilmorateApplicationTests {
 
-	private UserController userController;
-	private FilmController filmController;
-
-	@BeforeEach
-	void setUp() {
-		userController = new UserController();
-		filmController = new FilmController();
-	}
-
-	// ===================== USERS =====================
-
-	@Nested
-	class UserTests {
+    private UserController userController;
+    private FilmController filmController;
+
+    @BeforeEach
+    void setUp() {
+        userController = new UserController();
+        filmController = new FilmController();
+    }
 
-		private User createValidUser() {
-			User user = new User();
-			user.setEmail("test@mail.com");
-			user.setLogin("login");
-			user.setName("name");
-			user.setBirthday(LocalDate.of(2000, 1, 1));
-			return user;
-		}
+
+    @Nested
+    class UserTests {
 
+        private User createValidUser() {
+            User user = new User();
+            user.setEmail("test@mail.com");
+            user.setLogin("login");
+            user.setName("name");
+            user.setBirthday(LocalDate.of(2000, 1, 1));
+            return user;
+        }
 
-		@Test
-		void shouldThrow_whenEmailWithoutAt() {
-			User user = createValidUser();
-			user.setEmail("invalid");
 
-			assertThrows(ValidateException.class,
-					() -> userController.isUserValid(user));
-		}
+        @Test
+        void shouldThrow_whenEmailWithoutAt() {
+            User user = createValidUser();
+            user.setEmail("invalid");
 
-		@Test
-		void shouldThrow_whenEmailNull() {
-			User user = createValidUser();
-			user.setEmail(null);
+            assertThrows(ValidateException.class,
+                    () -> userController.isUserValid(user));
+        }
 
-			assertThrows(NullPointerException.class,
-					() -> userController.isUserValid(user));
-		}
+        @Test
+        void shouldThrow_whenEmailNull() {
+            User user = createValidUser();
+            user.setEmail(null);
 
-		@Test
-		void shouldThrow_whenLoginBlank() {
-			User user = createValidUser();
-			user.setLogin(" ");
+            assertThrows(NullPointerException.class,
+                    () -> userController.isUserValid(user));
+        }
 
-			assertThrows(ValidateException.class,
-					() -> userController.isUserValid(user));
-		}
+        @Test
+        void shouldThrow_whenLoginBlank() {
+            User user = createValidUser();
+            user.setLogin(" ");
 
-		@Test
-		void shouldThrow_whenLoginContainsSpaces() {
-			User user = createValidUser();
-			user.setLogin("log in");
+            assertThrows(ValidateException.class,
+                    () -> userController.isUserValid(user));
+        }
 
-			assertThrows(ValidateException.class,
-					() -> userController.isUserValid(user));
-		}
+        @Test
+        void shouldThrow_whenLoginContainsSpaces() {
+            User user = createValidUser();
+            user.setLogin("log in");
 
-		@Test
-		void shouldThrow_whenBirthdayInFuture() {
-			User user = createValidUser();
-			user.setBirthday(LocalDate.now().plusDays(1));
+            assertThrows(ValidateException.class,
+                    () -> userController.isUserValid(user));
+        }
 
-			assertThrows(ValidateException.class,
-					() -> userController.isUserValid(user));
-		}
+        @Test
+        void shouldThrow_whenBirthdayInFuture() {
+            User user = createValidUser();
+            user.setBirthday(LocalDate.now().plusDays(1));
 
-		@Test
-		void shouldPass_whenBirthdayToday() {
-			User user = createValidUser();
-			user.setBirthday(LocalDate.now());
+            assertThrows(ValidateException.class,
+                    () -> userController.isUserValid(user));
+        }
 
-			assertDoesNotThrow(() -> userController.isUserValid(user));
-		}
+        @Test
+        void shouldPass_whenBirthdayToday() {
+            User user = createValidUser();
+            user.setBirthday(LocalDate.now());
 
-		@Test
-		void shouldAddUser_andGenerateId() {
-			User user = createValidUser();
+            assertDoesNotThrow(() -> userController.isUserValid(user));
+        }
 
-			User saved = userController.addUser(user);
+        @Test
+        void shouldAddUser_andGenerateId() {
+            User user = createValidUser();
 
-			assertNotNull(saved.getId());
-			assertEquals(1, userController.getAllUsers().size());
-		}
+            User saved = userController.addUser(user);
 
-		@Test
-		void shouldSetNameFromLogin_whenNameBlank() {
-			User user = createValidUser();
-			user.setName(" ");
+            assertNotNull(saved.getId());
+            assertEquals(1, userController.getAllUsers().size());
+        }
 
-			User saved = userController.addUser(user);
+        @Test
+        void shouldSetNameFromLogin_whenNameBlank() {
+            User user = createValidUser();
+            user.setName(" ");
 
-			assertEquals("login", saved.getName());
-		}
+            User saved = userController.addUser(user);
 
-		@Test
-		void shouldIncrementIds() {
-			userController.addUser(createValidUser());
-			userController.addUser(createValidUser());
+            assertEquals("login", saved.getName());
+        }
 
-			assertEquals(2, userController.getAllUsers().size());
-		}
+        @Test
+        void shouldIncrementIds() {
+            userController.addUser(createValidUser());
+            userController.addUser(createValidUser());
 
-		@Test
-		void shouldStoreCorrectUserData() {
-			User user = createValidUser();
+            assertEquals(2, userController.getAllUsers().size());
+        }
 
-			userController.addUser(user);
+        @Test
+        void shouldStoreCorrectUserData() {
+            User user = createValidUser();
 
-			User stored = userController.getAllUsers().iterator().next();
+            userController.addUser(user);
 
-			assertEquals("login", stored.getLogin());
-		}
+            User stored = userController.getAllUsers().iterator().next();
 
-		@Test
-		void shouldUpdateUserName() {
-			User saved = userController.addUser(createValidUser());
+            assertEquals("login", stored.getLogin());
+        }
 
-			saved.setName("updated");
+        @Test
+        void shouldUpdateUserName() {
+            User saved = userController.addUser(createValidUser());
 
-			userController.updateUser(saved);
+            saved.setName("updated");
 
-			User updated = userController.getAllUsers().iterator().next();
+            userController.updateUser(saved);
 
-			assertEquals("updated", updated.getName());
-		}
+            User updated = userController.getAllUsers().iterator().next();
 
-		@Test
-		void shouldThrow_whenUpdateNonExistingUser() {
-			User user = createValidUser();
-			user.setId(999L);
+            assertEquals("updated", updated.getName());
+        }
 
-			assertThrows(NotFoundException.class,
-					() -> userController.updateUser(user));
-		}
+        @Test
+        void shouldThrow_whenUpdateNonExistingUser() {
+            User user = createValidUser();
+            user.setId(999L);
 
-		@Test
-		void shouldNotChangeIdOnUpdate() {
-			User saved = userController.addUser(createValidUser());
-			Long id = saved.getId();
+            assertThrows(NotFoundException.class,
+                    () -> userController.updateUser(user));
+        }
 
-			saved.setName("updated");
-			userController.updateUser(saved);
+        @Test
+        void shouldNotChangeIdOnUpdate() {
+            User saved = userController.addUser(createValidUser());
+            Long id = saved.getId();
 
-			User updated = userController.getAllUsers().iterator().next();
+            saved.setName("updated");
+            userController.updateUser(saved);
 
-			assertEquals(id, updated.getId());
-		}
-	}
+            User updated = userController.getAllUsers().iterator().next();
 
-	@Nested
-	class FilmTests {
+            assertEquals(id, updated.getId());
+        }
+    }
 
-		private Film createValidFilm() {
-			Film film = new Film();
-			film.setName("Film");
-			film.setDescription("Description");
-			film.setReleaseDate(LocalDate.of(2000, 1, 1));
-			film.setDuration(100);
-			return film;
-		}
+    @Nested
+    class FilmTests {
 
-		@Test
-		void shouldThrow_whenNameBlank() {
-			Film film = createValidFilm();
-			film.setName(" ");
+        private Film createValidFilm() {
+            Film film = new Film();
+            film.setName("Film");
+            film.setDescription("Description");
+            film.setReleaseDate(LocalDate.of(2000, 1, 1));
+            film.setDuration(100);
+            return film;
+        }
 
-			assertThrows(ValidateException.class,
-					() -> filmController.isValidFilm(film));
-		}
+        @Test
+        void shouldThrow_whenNameBlank() {
+            Film film = createValidFilm();
+            film.setName(" ");
 
-		@Test
-		void shouldThrow_whenDescriptionTooLong() {
-			Film film = createValidFilm();
-			film.setDescription("a".repeat(201));
+            assertThrows(ValidateException.class,
+                    () -> filmController.isValidFilm(film));
+        }
 
-			assertThrows(ValidateException.class,
-					() -> filmController.isValidFilm(film));
-		}
+        @Test
+        void shouldThrow_whenDescriptionTooLong() {
+            Film film = createValidFilm();
+            film.setDescription("a".repeat(201));
 
-		@Test
-		void shouldPass_whenDescriptionExactly200() {
-			Film film = createValidFilm();
-			film.setDescription("a".repeat(200));
+            assertThrows(ValidateException.class,
+                    () -> filmController.isValidFilm(film));
+        }
 
-			assertDoesNotThrow(() -> filmController.isValidFilm(film));
-		}
+        @Test
+        void shouldPass_whenDescriptionExactly200() {
+            Film film = createValidFilm();
+            film.setDescription("a".repeat(200));
 
-		@Test
-		void shouldThrow_whenReleaseDateTooEarly() {
-			Film film = createValidFilm();
-			film.setReleaseDate(LocalDate.of(1800, 1, 1));
+            assertDoesNotThrow(() -> filmController.isValidFilm(film));
+        }
 
-			assertThrows(ValidateException.class,
-					() -> filmController.isValidFilm(film));
-		}
+        @Test
+        void shouldThrow_whenReleaseDateTooEarly() {
+            Film film = createValidFilm();
+            film.setReleaseDate(LocalDate.of(1800, 1, 1));
 
-		@Test
-		void shouldPass_whenReleaseDateBoundary() {
-			Film film = createValidFilm();
-			film.setReleaseDate(LocalDate.of(1895, 12, 28));
+            assertThrows(ValidateException.class,
+                    () -> filmController.isValidFilm(film));
+        }
 
-			assertDoesNotThrow(() -> filmController.isValidFilm(film));
-		}
+        @Test
+        void shouldPass_whenReleaseDateBoundary() {
+            Film film = createValidFilm();
+            film.setReleaseDate(LocalDate.of(1895, 12, 28));
 
-		@Test
-		void shouldThrow_whenDurationZero() {
-			Film film = createValidFilm();
-			film.setDuration(0);
+            assertDoesNotThrow(() -> filmController.isValidFilm(film));
+        }
 
-			assertThrows(ValidateException.class,
-					() -> filmController.isValidFilm(film));
-		}
+        @Test
+        void shouldThrow_whenDurationZero() {
+            Film film = createValidFilm();
+            film.setDuration(0);
 
-		@Test
-		void shouldPass_whenDurationOne() {
-			Film film = createValidFilm();
-			film.setDuration(1);
+            assertThrows(ValidateException.class,
+                    () -> filmController.isValidFilm(film));
+        }
 
-			assertDoesNotThrow(() -> filmController.isValidFilm(film));
-		}
+        @Test
+        void shouldPass_whenDurationOne() {
+            Film film = createValidFilm();
+            film.setDuration(1);
 
-		@Test
-		void shouldAddFilm_andGenerateId() {
-			Film film = createValidFilm();
+            assertDoesNotThrow(() -> filmController.isValidFilm(film));
+        }
 
-			Film saved = filmController.addFilm(film);
+        @Test
+        void shouldAddFilm_andGenerateId() {
+            Film film = createValidFilm();
 
-			assertNotNull(saved.getId());
-			assertEquals(1, filmController.getAllFilms().size());
-		}
+            Film saved = filmController.addFilm(film);
 
-		@Test
-		void shouldStoreFilmCorrectly() {
-			Film film = createValidFilm();
+            assertNotNull(saved.getId());
+            assertEquals(1, filmController.getAllFilms().size());
+        }
 
-			filmController.addFilm(film);
+        @Test
+        void shouldStoreFilmCorrectly() {
+            Film film = createValidFilm();
 
-			Film stored = filmController.getAllFilms().iterator().next();
+            filmController.addFilm(film);
 
-			assertEquals("Film", stored.getName());
-		}
+            Film stored = filmController.getAllFilms().iterator().next();
 
-		@Test
-		void shouldIncrementFilmIds() {
-			filmController.addFilm(createValidFilm());
-			filmController.addFilm(createValidFilm());
+            assertEquals("Film", stored.getName());
+        }
 
-			assertEquals(2, filmController.getAllFilms().size());
-		}
+        @Test
+        void shouldIncrementFilmIds() {
+            filmController.addFilm(createValidFilm());
+            filmController.addFilm(createValidFilm());
 
-		@Test
-		void shouldUpdateFilmName() {
-			Film saved = filmController.addFilm(createValidFilm());
+            assertEquals(2, filmController.getAllFilms().size());
+        }
 
-			saved.setName("Updated");
+        @Test
+        void shouldUpdateFilmName() {
+            Film saved = filmController.addFilm(createValidFilm());
 
-			filmController.updateFilm(saved);
+            saved.setName("Updated");
 
-			Film updated = filmController.getAllFilms().iterator().next();
+            filmController.updateFilm(saved);
 
-			assertEquals("Updated", updated.getName());
-		}
+            Film updated = filmController.getAllFilms().iterator().next();
 
-		@Test
-		void shouldThrow_whenUpdateNonExistingFilm() {
-			Film film = createValidFilm();
-			film.setId(999L);
+            assertEquals("Updated", updated.getName());
+        }
 
-			assertThrows(NotFoundException.class,
-					() -> filmController.updateFilm(film));
-		}
-	}
+        @Test
+        void shouldThrow_whenUpdateNonExistingFilm() {
+            Film film = createValidFilm();
+            film.setId(999L);
+
+            assertThrows(NotFoundException.class,
+                    () -> filmController.updateFilm(film));
+        }
+    }
 }

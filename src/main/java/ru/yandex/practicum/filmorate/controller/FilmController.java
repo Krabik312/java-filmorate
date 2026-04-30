@@ -4,10 +4,12 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.HashMap;
+
 import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Logger;
 
@@ -23,15 +25,15 @@ public class FilmController {
     private static final Logger log = (Logger) LoggerFactory.getLogger(FilmController.class);
 
     @GetMapping
-    public Collection<Film> getAllFilms(){
+    public Collection<Film> getAllFilms() {
         log.trace("Отправка всех фильмов");
         return films.values();
     }
 
     @PostMapping
-    public Film addFilm(@RequestBody Film film){
+    public Film addFilm(@RequestBody Film film) {
         log.trace("Добавление фильма");
-        if (isValidFilm(film)){
+        if (isValidFilm(film)) {
             log.debug("Фильм прошел валидацию {}", film.toString());
 
             log.trace("Генерация id для фильма");
@@ -45,13 +47,13 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(@RequestBody Film film){
+    public Film updateFilm(@RequestBody Film film) {
         log.trace("Обновление фильма");
 
-        if (films.containsKey(film.getId())){
+        if (films.containsKey(film.getId())) {
             log.debug("Фильм найден для обновления {}", film.toString());
 
-            if (isValidFilm(film)){
+            if (isValidFilm(film)) {
                 log.trace("Обновление фильма в хранилище");
                 films.put(film.getId(), film);
             }
@@ -64,22 +66,22 @@ public class FilmController {
         throw new NotFoundException("Фильма с id " + film.getId() + " не существует");
     }
 
-    public boolean isValidFilm(Film film){
+    public boolean isValidFilm(Film film) {
         log.trace("Валидация фильма {}", film);
-        if (film.getName() == null || film.getName().isBlank()){
+        if (film.getName() == null || film.getName().isBlank()) {
             log.error("Ошибка валидации: пустое название фильма");
             throw new ValidateException("Название не может быть пустым");
         }
-        if (film.getDescription().length() > 200){
+        if (film.getDescription().length() > 200) {
             log.error("Ошибка валидации: слишком длинное описание, длина {}", film.getDescription().length());
             throw new ValidateException("Описание должно быть не длиннее 200 символов");
         }
-        if (film.getReleaseDate().isBefore(FIRST_FILM)){
+        if (film.getReleaseDate().isBefore(FIRST_FILM)) {
             log.error("Ошибка валидации: дата релиза {} раньше допустимой {}",
                     film.getReleaseDate(), FIRST_FILM);
             throw new ValidateException("Дата релиза не должна быть раньше" + FIRST_FILM.format(dtf));
         }
-        if (film.getDuration() < 1){
+        if (film.getDuration() < 1) {
             log.error("Ошибка валидации: некорректная длительность {}", film.getDuration());
             throw new ValidateException("Продолжительность фильма должна быть положительным числом");
         }
@@ -87,7 +89,7 @@ public class FilmController {
         return true;
     }
 
-    public Long getNextId(){
+    public Long getNextId() {
         log.trace("Генерация нового id для фильма");
 
         Long currentId = films.keySet()

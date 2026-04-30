@@ -20,18 +20,18 @@ public class UserController {
 
 
     @GetMapping
-    public Collection<User> getAllUsers(){
+    public Collection<User> getAllUsers() {
         log.trace("Отправка всех пользователей");
         return users.values();
     }
 
     @PostMapping
-    public User addUser(@RequestBody User user){
+    public User addUser(@RequestBody User user) {
         log.trace("Добавление пользователей");
-        if (isUserValid(user)){
+        if (isUserValid(user)) {
             log.debug("Пользователь прошел валидацию {}", user.toString());
             log.trace("Проверка имени пользователя");
-            if (user.getName() == null || user.getName().isBlank()){
+            if (user.getName() == null || user.getName().isBlank()) {
                 log.debug("Устанавливаем вместо имени логин {}", user.toString());
                 user.setName(user.getLogin());
             }
@@ -45,12 +45,12 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User user){
+    public User updateUser(@RequestBody User user) {
         log.trace("Обновление пользователя");
-        if (users.containsKey(user.getId())){
+        if (users.containsKey(user.getId())) {
             log.debug("Пользователь найден для обновления {}", user.toString());
             log.trace("Проверка имени пользователя");
-            if (user.getName() == null || user.getName().isBlank()){
+            if (user.getName() == null || user.getName().isBlank()) {
                 log.debug("Имя пустое, устанавливаем логин {}", user.toString());
                 user.setName(user.getLogin());
             }
@@ -58,28 +58,24 @@ public class UserController {
             users.put(user.getId(), user);
         } else {
             log.error("Попытка обновить несуществующего пользователя с id {}", user.getId());
-            throw new NotFoundException("User с id " +  user.getId() + " не существует");
+            throw new NotFoundException("User с id " + user.getId() + " не существует");
         }
         log.trace("Возвращаем обновленного пользователя");
         return user;
     }
 
 
-
-
-
-
-    public boolean isUserValid(User user){
+    public boolean isUserValid(User user) {
         log.trace("Валидация пользователя {}", user);
-        if (!user.getEmail().contains("@")){
+        if (!user.getEmail().contains("@")) {
             log.error("Ошибка валидации: email без @ - {}", user.getEmail());
             throw new ValidateException("В почте должен присутствовать знак @");
         }
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")){
+        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
             log.error("Ошибка валидации: некорректный логин {}", user.getLogin());
             throw new ValidateException("Логин не может быть пустым или содержать пробелы");
         }
-        if (user.getBirthday().isAfter(LocalDate.now())){
+        if (user.getBirthday().isAfter(LocalDate.now())) {
             log.error("Ошибка валидации: дата рождения в будущем: {}", user.getBirthday());
             throw new ValidateException("Дата рождения не может быть в будущем");
         }
@@ -87,7 +83,7 @@ public class UserController {
         return true;
     }
 
-    public Long getNextId(){
+    public Long getNextId() {
         log.trace("Генерация нового id");
         Long currentId = users.keySet()
                 .stream()
