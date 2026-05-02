@@ -20,7 +20,6 @@ class FilmorateApplicationTests {
         filmController = new FilmController();
     }
 
-
     @Nested
     class UserTests {
 
@@ -33,14 +32,13 @@ class FilmorateApplicationTests {
             return user;
         }
 
-
         @Test
         void shouldThrow_whenEmailWithoutAt() {
             User user = createValidUser();
             user.setEmail("invalid");
 
             assertThrows(ValidateException.class,
-                    () -> userController.isUserValid(user));
+                    () -> userController.addUser(user));
         }
 
         @Test
@@ -48,8 +46,8 @@ class FilmorateApplicationTests {
             User user = createValidUser();
             user.setEmail(null);
 
-            assertThrows(NullPointerException.class,
-                    () -> userController.isUserValid(user));
+            assertThrows(ValidateException.class,
+                    () -> userController.addUser(user));
         }
 
         @Test
@@ -58,7 +56,7 @@ class FilmorateApplicationTests {
             user.setLogin(" ");
 
             assertThrows(ValidateException.class,
-                    () -> userController.isUserValid(user));
+                    () -> userController.addUser(user));
         }
 
         @Test
@@ -67,7 +65,7 @@ class FilmorateApplicationTests {
             user.setLogin("log in");
 
             assertThrows(ValidateException.class,
-                    () -> userController.isUserValid(user));
+                    () -> userController.addUser(user));
         }
 
         @Test
@@ -76,7 +74,7 @@ class FilmorateApplicationTests {
             user.setBirthday(LocalDate.now().plusDays(1));
 
             assertThrows(ValidateException.class,
-                    () -> userController.isUserValid(user));
+                    () -> userController.addUser(user));
         }
 
         @Test
@@ -84,7 +82,7 @@ class FilmorateApplicationTests {
             User user = createValidUser();
             user.setBirthday(LocalDate.now());
 
-            assertDoesNotThrow(() -> userController.isUserValid(user));
+            assertDoesNotThrow(() -> userController.addUser(user));
         }
 
         @Test
@@ -180,7 +178,7 @@ class FilmorateApplicationTests {
             film.setName(" ");
 
             assertThrows(ValidateException.class,
-                    () -> filmController.isValidFilm(film));
+                    () -> filmController.addFilm(film));
         }
 
         @Test
@@ -189,7 +187,7 @@ class FilmorateApplicationTests {
             film.setDescription("a".repeat(201));
 
             assertThrows(ValidateException.class,
-                    () -> filmController.isValidFilm(film));
+                    () -> filmController.addFilm(film));
         }
 
         @Test
@@ -197,7 +195,7 @@ class FilmorateApplicationTests {
             Film film = createValidFilm();
             film.setDescription("a".repeat(200));
 
-            assertDoesNotThrow(() -> filmController.isValidFilm(film));
+            assertDoesNotThrow(() -> filmController.addFilm(film));
         }
 
         @Test
@@ -206,7 +204,7 @@ class FilmorateApplicationTests {
             film.setReleaseDate(LocalDate.of(1800, 1, 1));
 
             assertThrows(ValidateException.class,
-                    () -> filmController.isValidFilm(film));
+                    () -> filmController.addFilm(film));
         }
 
         @Test
@@ -214,7 +212,7 @@ class FilmorateApplicationTests {
             Film film = createValidFilm();
             film.setReleaseDate(LocalDate.of(1895, 12, 28));
 
-            assertDoesNotThrow(() -> filmController.isValidFilm(film));
+            assertDoesNotThrow(() -> filmController.addFilm(film));
         }
 
         @Test
@@ -223,7 +221,7 @@ class FilmorateApplicationTests {
             film.setDuration(0);
 
             assertThrows(ValidateException.class,
-                    () -> filmController.isValidFilm(film));
+                    () -> filmController.addFilm(film));
         }
 
         @Test
@@ -231,7 +229,7 @@ class FilmorateApplicationTests {
             Film film = createValidFilm();
             film.setDuration(1);
 
-            assertDoesNotThrow(() -> filmController.isValidFilm(film));
+            assertDoesNotThrow(() -> filmController.addFilm(film));
         }
 
         @Test
