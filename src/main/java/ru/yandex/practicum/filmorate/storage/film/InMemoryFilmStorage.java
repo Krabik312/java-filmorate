@@ -82,7 +82,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     public Film getFilmById(Long filmId) {
         Film film = films.get(filmId);
-        if (film == null){
+        if (film == null) {
             throw new NotFoundException("Фильм с id: " + filmId + " не найден");
         }
         return film;

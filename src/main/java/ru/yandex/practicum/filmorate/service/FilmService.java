@@ -16,15 +16,15 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
-    public Collection<Film> getAllFilms(){
+    public Collection<Film> getAllFilms() {
         return filmStorage.getAllFilms();
     }
 
-    public Film addFilm(Film film){
+    public Film addFilm(Film film) {
         return filmStorage.addFilm(film);
     }
 
-    public Film updateFilm(Film film){
+    public Film updateFilm(Film film) {
         return filmStorage.updateFilm(film);
     }
 

@@ -17,19 +17,19 @@ public class UserService {
     private final UserStorage userStorage;
 
 
-    public User getUserById(Long userId){
+    public User getUserById(Long userId) {
         return userStorage.getUserById(userId);
     }
 
-    public Collection<User> getAllUsers(){
+    public Collection<User> getAllUsers() {
         return userStorage.getAllUsers();
     }
 
-    public User addUser(User user){
+    public User addUser(User user) {
         return userStorage.addUser(user);
     }
 
-    public User updateUser(User user){
+    public User updateUser(User user) {
         return userStorage.updateUser(user);
     }
 
