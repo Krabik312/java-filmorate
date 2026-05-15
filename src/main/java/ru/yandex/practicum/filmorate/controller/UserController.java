@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -35,13 +34,13 @@ public class UserController {
     }
 
     @PostMapping
-    @Validated({Marker.OnCreate.class, Default.class})
+    @Validated(Marker.OnCreate.class)
     public User addUser(@Valid @RequestBody User user) {
         return userService.addUser(user);
     }
 
     @PutMapping
-    @Validated({Marker.OnUpdate.class, Default.class})
+    @Validated(Marker.OnUpdate.class)
     public User updateUser(@Valid @RequestBody User user) {
         return userService.updateUser(user);
     }
@@ -66,5 +65,4 @@ public class UserController {
                                           @PathVariable("otherId") @Positive Long otherUserId) {
         return userService.getAllCommonFriends(userId, otherUserId);
     }
-
 }

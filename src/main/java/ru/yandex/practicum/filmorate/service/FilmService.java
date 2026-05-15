@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -29,19 +30,21 @@ public class FilmService {
     }
 
     public Film getFilmById(Long filmId) {
-        return filmStorage.getFilmById(filmId);
+        return getFilmOrThrow(filmId);
     }
 
     public void addLike(Long filmId, Long userId) {
-        Film film = filmStorage.getFilmById(filmId);
-        userStorage.getUserById(userId);
-        film.addLike(userId);
+        if (userStorage.getUserById(userId).isEmpty()) {
+            throw new NotFoundException("Пользователь с id: " + userId + " не найден");
+        }
+        getFilmOrThrow(filmId).addLike(userId);
     }
 
     public void deleteLike(Long filmId, Long userId) {
-        Film film = filmStorage.getFilmById(filmId);
-        userStorage.getUserById(userId);
-        film.deleteLike(userId);
+        if (userStorage.getUserById(userId).isEmpty()) {
+            throw new NotFoundException("Пользователь с id: " + userId + " не найден");
+        }
+        getFilmOrThrow(filmId).deleteLike(userId);
     }
 
     public List<Film> getPopularFilmsByLike(Integer count) {
@@ -53,5 +56,11 @@ public class FilmService {
                 .limit(count)
                 .toList();
         return popularFilms;
+    }
+
+    private Film getFilmOrThrow(Long filmId) {
+        return filmStorage.getFilmById(filmId).orElseThrow(() ->
+                new NotFoundException("Фильм с id: " + filmId + " не найден")
+        );
     }
 }

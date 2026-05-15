@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -11,8 +10,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.HashMap;
-
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -40,8 +39,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
         film.setId(getNextId());
         films.put(film.getId(), film);
-
-        log.trace("Возвращаем фильм");
         return film;
     }
 
@@ -80,17 +77,13 @@ public class InMemoryFilmStorage implements FilmStorage {
         return updateFilm;
     }
 
-    public Film getFilmById(Long filmId) {
+    public Optional<Film> getFilmById(Long filmId) {
         Film film = films.get(filmId);
-        if (film == null) {
-            throw new NotFoundException("Фильм с id: " + filmId + " не найден");
-        }
-        return film;
+        return Optional.ofNullable(film);
     }
 
-    @Override
-    public Long getNextId() {
-        log.trace("Генерация нового id для фильма");
+
+    private Long getNextId() {
 
         Long currentId = films.keySet()
                 .stream()

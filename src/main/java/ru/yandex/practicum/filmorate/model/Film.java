@@ -8,23 +8,47 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-
 @Data
 public class Film {
 
     @Null(groups = Marker.OnCreate.class, message = "Id не задается пользователем")
     @NotNull(groups = Marker.OnUpdate.class, message = "Должен быть id")
     private Long id;
-    @NotBlank(message = "Имя не может быть null или пустым")
+
+    @NotBlank(
+            groups = {Marker.OnCreate.class, Marker.OnUpdate.class},
+            message = "Имя не может быть null или пустым"
+    )
     private String name;
-    @Size(max = 200, message = "Максимальная длина описания 200 символов")
-    @NotNull(groups = Marker.OnCreate.class, message = "Описание не должно быть пустым")
+
+    @Size(
+            groups = {Marker.OnCreate.class, Marker.OnUpdate.class},
+            max = 200,
+            message = "Максимальная длина описания 200 символов"
+    )
+    @NotNull(
+            groups = Marker.OnCreate.class,
+            message = "Описание не должно быть пустым"
+    )
     private String description;
-    @NotNull(groups = Marker.OnCreate.class, message = "Дата выхода должна быть указана")
+
+    @NotNull(
+            groups = Marker.OnCreate.class,
+            message = "Дата выхода должна быть указана"
+    )
     private LocalDate releaseDate;
-    @Min(value = 1, message = "Продолжительность фильма не может быть меньше 1й минуты")
-    @NotNull(groups = Marker.OnCreate.class, message = "Длительность должна быть указана")
+
+    @Min(
+            groups = {Marker.OnCreate.class, Marker.OnUpdate.class},
+            value = 1,
+            message = "Продолжительность фильма не может быть меньше 1й минуты"
+    )
+    @NotNull(
+            groups = Marker.OnCreate.class,
+            message = "Длительность должна быть указана"
+    )
     private Integer duration;
+
     private Set<Long> likes = new HashSet<>();
 
     public void addLike(Long userId) {
