@@ -4,7 +4,7 @@ Template repository for Filmorate project.
 
 
 DB for Filmorate:
-![image](filmorate_DB.png)
+![image](Filmorate_DataBase.png)
 
 ## Пояснение к схеме базы данных
 
