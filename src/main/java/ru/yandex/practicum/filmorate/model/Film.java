@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.storage.marker.Marker;
@@ -50,6 +51,16 @@ public class Film {
     private Integer duration;
 
     private Set<Long> likes = new HashSet<>();
+
+    @Valid
+    @NotNull(
+            groups = {Marker.OnCreate.class, Marker.OnUpdate.class},
+            message = "MPA должен быть указан"
+    )
+    private Mpa mpa;
+
+    @Valid
+    private Set<Genre> genres = new HashSet<>();
 
     public void addLike(Long userId) {
         likes.add(userId);

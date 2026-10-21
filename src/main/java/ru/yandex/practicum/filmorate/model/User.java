@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Validate;
 import ru.yandex.practicum.filmorate.storage.marker.Marker;
 
 import java.time.LocalDate;
@@ -53,13 +55,7 @@ public class User {
     )
     private LocalDate birthday;
 
-    private Set<Long> friends = new HashSet<>();
+    @Valid
+    private Set<Friendship> friendships = new HashSet<>();
 
-    public void addFriend(Long id) {
-        friends.add(id);
-    }
-
-    public void deleteFriend(Long id) {
-        friends.remove(id);
-    }
 }

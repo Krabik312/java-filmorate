@@ -48,7 +48,7 @@ public class FilmController {
 
     @PutMapping
     @Validated(Marker.OnUpdate.class)
-    public Film updateFilm(@Valid @RequestBody Film film) {
+    public Film  updateFilm(@Valid @RequestBody Film film) {
         return filmService.updateFilm(film);
     }
 
