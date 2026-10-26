@@ -24,12 +24,12 @@ public class GenreController {
     private final GenreService genreService;
 
     @GetMapping
-    public Collection<Genre> getAllGenres(){
+    public Collection<Genre> getAllGenres() {
         return genreService.getAllGenres();
     }
 
     @GetMapping("/{id}")
-    public Genre getGenreById(@PathVariable("id") @Positive Long genreId){
+    public Genre getGenreById(@PathVariable("id") @Positive Long genreId) {
         return genreService.getGenreById(genreId);
     }
 

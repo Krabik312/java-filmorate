@@ -100,10 +100,10 @@ public class FilmDbStorage implements FilmStorage {
             "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
 
     private static final String ADD_LIKE = """
-        MERGE INTO film_likes (film_id, user_id)
-        KEY (film_id, user_id)
-        VALUES (?, ?)
-        """;
+            MERGE INTO film_likes (film_id, user_id)
+            KEY (film_id, user_id)
+            VALUES (?, ?)
+            """;
 
     private static final String DELETE_LIKE =
             "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";

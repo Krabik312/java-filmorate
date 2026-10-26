@@ -40,7 +40,6 @@ public class UserController {
     }
 
 
-
     @PutMapping
     public User updateUser(
             @Validated(Marker.OnUpdate.class) @RequestBody User user

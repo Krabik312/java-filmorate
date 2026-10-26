@@ -83,23 +83,23 @@ public class FilmService {
         );
     }
 
-    private void isFilmDateValid(Film film){
+    private void isFilmDateValid(Film film) {
         if (film.getReleaseDate().isBefore(dateStartValidation) ||
-                film.getReleaseDate().isAfter(dateFinishValidation)){
+                film.getReleaseDate().isAfter(dateFinishValidation)) {
             throw new ValidateException("Неверная дата выхода фильма");
         }
     }
 
-    private void isIdGenreValid(Film film){
-        for (Genre genre : film.getGenres()){
-            if (genre.getId() < 1 || genre.getId() > 6){
+    private void isIdGenreValid(Film film) {
+        for (Genre genre : film.getGenres()) {
+            if (genre.getId() < 1 || genre.getId() > 6) {
                 throw new NotFoundException("Такого жанра не существует");
             }
         }
     }
 
-    private void isMpaValid(Film film){
-        if (film.getMpa().getId() < 1 || film.getMpa().getId() > 5){
+    private void isMpaValid(Film film) {
+        if (film.getMpa().getId() < 1 || film.getMpa().getId() > 5) {
             throw new NotFoundException("Такого рейтинга не существует");
         }
     }
