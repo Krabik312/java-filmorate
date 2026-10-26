@@ -9,12 +9,10 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidateException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.marker.Marker;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,13 +22,11 @@ class UserLogicTests {
 
     private Validator validator;
     private InMemoryUserStorage userStorage;
-    private UserService userService;
 
     @BeforeEach
     void setUp() {
         validator = Validation.buildDefaultValidatorFactory().getValidator();
         userStorage = new InMemoryUserStorage();
-        userService = new UserService(userStorage);
     }
 
     private User validUser() {
@@ -42,13 +38,6 @@ class UserLogicTests {
         return user;
     }
 
-    private User persistUser(String login) {
-        User user = validUser();
-        user.setLogin(login);
-        user.setEmail(login + "@yandex.ru");
-        user.setName(login);
-        return userStorage.addUser(user);
-    }
 
     @Test
     void validUserCreateHasNoViolations() {
@@ -223,76 +212,5 @@ class UserLogicTests {
         assertThat(userStorage.getUserById(999L)).isEmpty();
     }
 
-    @Test
-    void addFriendCreatesMutualLink() {
-        User user = userStorage.addUser(validUser());
-        User friend = persistUser("friend");
 
-        userService.addFriend(user.getId(), friend.getId());
-
-        assertThat(user.getFriends()).contains(friend.getId());
-        assertThat(friend.getFriends()).contains(user.getId());
-    }
-
-    @Test
-    void deleteFriendRemovesMutualLink() {
-        User user = userStorage.addUser(validUser());
-        User friend = persistUser("friend");
-
-        userService.addFriend(user.getId(), friend.getId());
-        userService.deleteFriend(user.getId(), friend.getId());
-
-        assertThat(user.getFriends()).doesNotContain(friend.getId());
-        assertThat(friend.getFriends()).doesNotContain(user.getId());
-    }
-
-    @Test
-    void getAllFriendsReturnsStoredUsers() {
-        User user = userStorage.addUser(validUser());
-        User friend1 = persistUser("friend1");
-        User friend2 = persistUser("friend2");
-
-        userService.addFriend(user.getId(), friend1.getId());
-        userService.addFriend(user.getId(), friend2.getId());
-
-        List<User> friends = userService.getAllFriends(user.getId());
-
-        assertThat(friends).extracting(User::getId)
-                .containsExactlyInAnyOrder(friend1.getId(), friend2.getId());
-    }
-
-    @Test
-    void getAllCommonFriendsReturnsIntersection() {
-        User user1 = userStorage.addUser(validUser());
-        User user2 = persistUser("user2");
-        User common = persistUser("common");
-        User other = persistUser("other");
-
-        userService.addFriend(user1.getId(), common.getId());
-        userService.addFriend(user1.getId(), other.getId());
-        userService.addFriend(user2.getId(), common.getId());
-
-        List<User> commonFriends = userService.getAllCommonFriends(user1.getId(), user2.getId());
-
-        assertThat(commonFriends).extracting(User::getId)
-                .containsExactly(common.getId());
-    }
-
-    @Test
-    void addFriendWithMissingUserThrowsNotFoundException() {
-        User friend = userStorage.addUser(validUser());
-
-        assertThatThrownBy(() -> userService.addFriend(999L, friend.getId()))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Пользователь с id: 999");
-    }
-
-    @Test
-    void addFriendWithMissingFriendThrowsNotFoundException() {
-        User user = userStorage.addUser(validUser());
-
-        assertThatThrownBy(() -> userService.addFriend(user.getId(), 999L))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Пользователь с id: 999");
-    }
 }

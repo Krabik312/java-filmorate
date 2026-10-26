@@ -1,14 +1,16 @@
+
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Validate;
 import ru.yandex.practicum.filmorate.storage.marker.Marker;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 public class User {
@@ -24,7 +26,10 @@ public class User {
     private Long id;
 
     @Email(
-            groups = {Marker.OnCreate.class, Marker.OnUpdate.class},
+            groups = {
+                    Marker.OnCreate.class,
+                    Marker.OnUpdate.class
+            },
             message = "Некорректный email"
     )
     @NotBlank(
@@ -33,13 +38,14 @@ public class User {
     )
     private String email;
 
-    @NotNull(
-            groups = Marker.OnCreate.class,
-            message = "Должен передаваться login"
-    )
     @NotBlank(
-            groups = {Marker.OnCreate.class, Marker.OnUpdate.class},
+            groups = Marker.OnCreate.class,
             message = "Login не должен быть пустым или состоять из пробелов"
+    )
+    @Pattern(
+            regexp = "\\S+",
+            groups = Marker.OnUpdate.class,
+            message = "Login не должен содержать пробелы"
     )
     private String login;
 
@@ -50,12 +56,11 @@ public class User {
             message = "Должен передаваться birthday"
     )
     @PastOrPresent(
-            groups = {Marker.OnCreate.class, Marker.OnUpdate.class},
+            groups = {
+                    Marker.OnCreate.class,
+                    Marker.OnUpdate.class
+            },
             message = "День рождения не может быть в будущем"
     )
     private LocalDate birthday;
-
-    @Valid
-    private Set<Friendship> friendships = new HashSet<>();
-
 }

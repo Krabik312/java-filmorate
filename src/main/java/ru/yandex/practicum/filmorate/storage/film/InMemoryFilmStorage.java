@@ -8,10 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -80,6 +77,45 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Optional<Film> getFilmById(Long filmId) {
         Film film = films.get(filmId);
         return Optional.ofNullable(film);
+    }
+
+    @Override
+    public void addLike(Long filmId, Long userId) {
+        Film film = getFilmById(filmId)
+                .orElseThrow(() -> new NotFoundException(
+                        "Фильм с id " + filmId + " не найден"
+                ));
+
+        film.addLike(userId);
+    }
+
+    @Override
+    public void deleteLike(Long filmId, Long userId) {
+        Film film = getFilmById(filmId)
+                .orElseThrow(() -> new NotFoundException(
+                        "Фильм с id " + filmId + " не найден"
+                ));
+
+        film.deleteLike(userId);
+    }
+
+    @Override
+    public List<Film> getPopularFilmsByLike(Integer count) {
+        if (count == null || count <= 0) {
+            throw new IllegalArgumentException(
+                    "Количество фильмов должно быть положительным"
+            );
+        }
+
+        return films.values().stream()
+                .sorted(
+                        Comparator.comparingInt(
+                                        (Film film) -> film.getLikes().size()
+                                ).reversed()
+                                .thenComparing(Film::getId)
+                )
+                .limit(count)
+                .toList();
     }
 
 

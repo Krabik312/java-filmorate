@@ -41,14 +41,17 @@ public class FilmController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Validated(Marker.OnCreate.class)
-    public Film addFilm(@Valid @RequestBody Film film) {
+    public Film addFilm(
+            @Validated(Marker.OnCreate.class) @RequestBody Film film
+
+    ) {
         return filmService.addFilm(film);
     }
 
     @PutMapping
-    @Validated(Marker.OnUpdate.class)
-    public Film  updateFilm(@Valid @RequestBody Film film) {
+    public Film updateFilm(
+            @Validated(Marker.OnUpdate.class) @RequestBody Film film
+    ) {
         return filmService.updateFilm(film);
     }
 

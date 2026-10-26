@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,14 +33,18 @@ public class UserController {
     }
 
     @PostMapping
-    @Validated(Marker.OnCreate.class)
-    public User addUser(@Valid @RequestBody User user) {
+    public User addUser(
+            @Validated(Marker.OnCreate.class) @RequestBody User user
+    ) {
         return userService.addUser(user);
     }
 
+
+
     @PutMapping
-    @Validated(Marker.OnUpdate.class)
-    public User updateUser(@Valid @RequestBody User user) {
+    public User updateUser(
+            @Validated(Marker.OnUpdate.class) @RequestBody User user
+    ) {
         return userService.updateUser(user);
     }
 

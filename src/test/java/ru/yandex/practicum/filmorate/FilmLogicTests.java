@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.marker.Marker;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -39,10 +40,16 @@ class FilmLogicTests {
 
     private Film validFilm() {
         Film film = new Film();
+
         film.setName("Film");
         film.setDescription("Nice film");
         film.setReleaseDate(LocalDate.of(2000, 1, 1));
         film.setDuration(120);
+
+        Mpa mpa = new Mpa();
+        mpa.setId(1);
+        film.setMpa(mpa);
+
         return film;
     }
 
@@ -272,7 +279,7 @@ class FilmLogicTests {
 
     @Test
     void addLikeWithMissingFilmThrowsNotFoundException() {
-        User user = validUser();
+        User user = userStorage.addUser(validUser());
 
         assertThatThrownBy(() -> filmService.addLike(999L, user.getId()))
                 .isInstanceOf(NotFoundException.class)
