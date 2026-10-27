@@ -7,6 +7,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import ru.yandex.practicum.filmorate.dal.FilmDbStorage;
+import ru.yandex.practicum.filmorate.dal.FilmGenreDbStorage;
+import ru.yandex.practicum.filmorate.dal.FilmLikeDbStorage;
 import ru.yandex.practicum.filmorate.dal.UserDbStorage;
 import ru.yandex.practicum.filmorate.dal.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.dal.mappers.GenreRowMapper;
@@ -28,6 +30,8 @@ import static org.assertj.core.api.Assertions.*;
 @AutoConfigureTestDatabase
 @Import({
         FilmDbStorage.class,
+        FilmGenreDbStorage.class,
+        FilmLikeDbStorage.class,
         UserDbStorage.class,
         FilmRowMapper.class,
         GenreRowMapper.class,
@@ -330,17 +334,6 @@ class FilmDbStorageIntegrationTest {
 
         assertThat(filmStorage.getPopularFilmsByLike(2))
                 .hasSize(2);
-    }
-
-    @Test
-    void popularFilmsRejectInvalidCount() {
-        assertThatThrownBy(
-                () -> filmStorage.getPopularFilmsByLike(0)
-        ).isInstanceOf(IllegalArgumentException.class);
-
-        assertThatThrownBy(
-                () -> filmStorage.getPopularFilmsByLike(null)
-        ).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

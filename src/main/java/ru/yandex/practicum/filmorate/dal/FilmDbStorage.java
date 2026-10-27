@@ -4,15 +4,12 @@ package ru.yandex.practicum.filmorate.dal;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.sql.PreparedStatement;
@@ -33,28 +30,6 @@ public class FilmDbStorage implements FilmStorage {
             FROM films AS f
             JOIN mpa AS m ON m.mpa_id = f.mpa_id
             ORDER BY f.id
-            """;
-
-    private static final String FIND_GENRES_BY_FILM_ID = """
-            SELECT g.genre_id, g.genre_name
-            FROM film_genre AS fg
-            JOIN genre AS g ON g.genre_id = fg.genre_id
-            WHERE fg.film_id = ?
-            ORDER BY g.genre_id
-            """;
-
-    private static final String FIND_LIKES_BY_FILM_ID = """
-            SELECT user_id
-            FROM film_likes
-            WHERE film_id = ?
-            """;
-
-    private static final String FIND_GENRES_FOR_FILMS = """
-            SELECT fg.film_id, g.genre_id, g.genre_name
-            FROM film_genre AS fg
-            JOIN genre AS g ON g.genre_id = fg.genre_id
-            WHERE fg.film_id IN (:filmIds)
-            ORDER BY fg.film_id, g.genre_id
             """;
 
     private static final String FIND_LIKES_FOR_FILMS = """
@@ -93,36 +68,22 @@ public class FilmDbStorage implements FilmStorage {
             WHERE id = ?
             """;
 
-    private static final String DELETE_GENRES =
-            "DELETE FROM film_genre WHERE film_id = ?";
-
-    private static final String ADD_GENRE =
-            "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
-
-    private static final String ADD_LIKE = """
-            MERGE INTO film_likes (film_id, user_id)
-            KEY (film_id, user_id)
-            VALUES (?, ?)
-            """;
-
-    private static final String DELETE_LIKE =
-            "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
 
     private final JdbcTemplate jdbc;
-    private final NamedParameterJdbcTemplate namedJdbc;
     private final RowMapper<Film> filmMapper;
-    private final RowMapper<Genre> genreMapper;
+    private final FilmGenreDbStorage genreStorage;
+    private final FilmLikeDbStorage likeStorage;
 
     public FilmDbStorage(
             JdbcTemplate jdbc,
-            NamedParameterJdbcTemplate namedJdbc,
             RowMapper<Film> filmMapper,
-            RowMapper<Genre> genreMapper
+            FilmGenreDbStorage genreStorage,
+            FilmLikeDbStorage likeStorage
     ) {
         this.jdbc = jdbc;
-        this.namedJdbc = namedJdbc;
         this.filmMapper = filmMapper;
-        this.genreMapper = genreMapper;
+        this.genreStorage = genreStorage;
+        this.likeStorage = likeStorage;
     }
 
     @Override
@@ -165,15 +126,7 @@ public class FilmDbStorage implements FilmStorage {
 
         film.setId(generatedId.longValue());
 
-        if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                jdbc.update(
-                        ADD_GENRE,
-                        film.getId(),
-                        genre.getId()
-                );
-            }
-        }
+        genreStorage.addGenres(film.getId(), film.getGenres());
 
         return getFilmById(film.getId())
                 .orElseThrow(() -> new IllegalStateException(
@@ -200,17 +153,7 @@ public class FilmDbStorage implements FilmStorage {
             );
         }
 
-        jdbc.update(DELETE_GENRES, film.getId());
-
-        if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                jdbc.update(
-                        ADD_GENRE,
-                        film.getId(),
-                        genre.getId()
-                );
-            }
-        }
+        genreStorage.replaceGenres(film.getId(), film.getGenres());
 
         return getFilmById(film.getId())
                 .orElseThrow(() -> new IllegalStateException(
@@ -218,106 +161,54 @@ public class FilmDbStorage implements FilmStorage {
                 ));
     }
 
+
     @Override
     @Transactional(readOnly = true)
     public Optional<Film> getFilmById(Long filmId) {
         try {
-            Film result = jdbc.queryForObject(
+            Film film = jdbc.queryForObject(
                     FIND_BY_ID_QUERY,
                     filmMapper,
                     filmId
             );
 
-            Set<Genre> genres = new LinkedHashSet<>(
-                    jdbc.query(
-                            FIND_GENRES_BY_FILM_ID,
-                            genreMapper,
-                            filmId
-                    )
-            );
+            if (film != null) {
+                film.setGenres(
+                        genreStorage.getGenresByFilmId(filmId)
+                );
 
-            Set<Long> likes = new HashSet<>(
-                    jdbc.query(
-                            FIND_LIKES_BY_FILM_ID,
-                            (rs, rowNum) -> rs.getLong("user_id"),
-                            filmId
-                    )
-            );
-
-            if (result != null) {
-                result.setGenres(genres);
-                result.setLikes(likes);
+                film.setLikes(
+                        likeStorage.getLikesByFilmId(filmId)
+                );
             }
 
-            return Optional.ofNullable(result);
+            return Optional.ofNullable(film);
 
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
     }
 
+
     private void loadFilmDetails(List<Film> films) {
-        if (films.isEmpty()) {
-            return;
-        }
-
-        Map<Long, Film> filmsById = new HashMap<>();
-
-        for (Film film : films) {
-            film.setGenres(new LinkedHashSet<>());
-            film.setLikes(new HashSet<>());
-            filmsById.put(film.getId(), film);
-        }
-
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("filmIds", filmsById.keySet());
-
-        namedJdbc.query(FIND_GENRES_FOR_FILMS, params, rs -> {
-            long filmId = rs.getLong("film_id");
-
-            Genre genre = genreMapper.mapRow(
-                    rs,
-                    rs.getRow() - 1
-            );
-
-            Film film = filmsById.get(filmId);
-
-            if (film != null) {
-                film.getGenres().add(genre);
-            }
-        });
-
-        namedJdbc.query(FIND_LIKES_FOR_FILMS, params, rs -> {
-            long filmId = rs.getLong("film_id");
-            long userId = rs.getLong("user_id");
-
-            Film film = filmsById.get(filmId);
-
-            if (film != null) {
-                film.getLikes().add(userId);
-            }
-        });
+        genreStorage.loadGenres(films);
+        likeStorage.loadLikes(films);
     }
+
 
     @Override
     public void addLike(Long filmId, Long userId) {
-        jdbc.update(ADD_LIKE, filmId, userId);
+        likeStorage.addLike(filmId, userId);
     }
 
     @Override
     public void deleteLike(Long filmId, Long userId) {
-        jdbc.update(DELETE_LIKE, filmId, userId);
+        likeStorage.deleteLike(filmId, userId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Film> getPopularFilmsByLike(Integer count) {
-        if (count == null || count <= 0) {
-            throw new IllegalArgumentException(
-                    "Количество фильмов должно быть положительным"
-            );
-        }
-
         List<Film> films = jdbc.query(
                 FIND_POPULAR_FILMS,
                 filmMapper,

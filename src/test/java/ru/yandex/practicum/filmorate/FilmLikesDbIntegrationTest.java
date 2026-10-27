@@ -7,6 +7,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import ru.yandex.practicum.filmorate.dal.FilmDbStorage;
+import ru.yandex.practicum.filmorate.dal.FilmGenreDbStorage;
+import ru.yandex.practicum.filmorate.dal.FilmLikeDbStorage;
 import ru.yandex.practicum.filmorate.dal.UserDbStorage;
 import ru.yandex.practicum.filmorate.dal.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.dal.mappers.GenreRowMapper;
@@ -27,7 +29,9 @@ import static org.assertj.core.api.Assertions.assertThat;
         UserRowMapper.class,
         FilmDbStorage.class,
         FilmRowMapper.class,
-        GenreRowMapper.class
+        GenreRowMapper.class,
+        FilmGenreDbStorage.class,
+        FilmLikeDbStorage.class,
 })
 class FilmLikesDbIntegrationTest {
 
